@@ -1,0 +1,5 @@
+ar
+cs
+hi
+fa
+tr
