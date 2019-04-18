@@ -84,8 +84,9 @@ def from_top(tag, tags, amount, banned_languaches, non_bmp_map, header):
             print(code)
             codes.append(code)
 
-        moretags.extend(local_tags)
-         
+        for tag in local_tags:
+            if tag not in moretags:
+                moretags.append(tag)
     return(moretags,codes)
 
 def from_first_comment(code, header, tags, banned_languaches, non_bmp_map):
@@ -99,10 +100,13 @@ def from_first_comment(code, header, tags, banned_languaches, non_bmp_map):
         local_tags = []
     return local_tags
 
-def is_personal():
+def is_personal(): #check if the tag used as personal tag
     pass
 
-def is_banned():
+def is_banned(): #if tag contains banned components
+    pass
+
+def masssearch(): #search for all themes in file
     pass
 
 def sort_by_frequency(tags, amount):
@@ -122,20 +126,18 @@ def sort_by_frequency(tags, amount):
             del tags[i]
         elif posts_count > amount[0] and posts_count < amount[1]:
             low.append(tags[i])
-            print('l')
         elif posts_count > amount[1] and posts_count < amount[2]:
             middle.append(tags[i])
-            print('m')
         elif posts_count > amount[2] and posts_count < amount[3]:
             high.append(tags[i])
-            print('h')
         i -= 1
+        print('.', end = ' ')
     return low, middle, high
 
 
 while True:
     print('Enter the word "new" followed by some tag (two words separated by whitespace, without "#" sign)'
-          ' to search by new user-defined tag..\n\n..or "mass search" for checking existing tags from file.'
+          ' to search by new user-defined tag..\n\n'
           '\n\nEnter "q" to quit.')
     tags_and_codes = []
     command = input().split()
@@ -159,49 +161,46 @@ while True:
                         more_tags = from_first_comment(code, header, tags_and_codes[1], banned_languaches, non_bmp_map)
                         tags_and_codes[0].extend(more_tags)
 
-            print ('Is sorting by frequency needed? Press "y" for Yes or "n" for No.\n')
+            print ('\nIs sorting by frequency needed? Enter "y" for Yes or any other letter for No.')
             ifsort = input()
-            
-            k = 9
-            num = len(tags_and_codes[0])//k
-            print('TOTAL ', len(tags_and_codes[0]))
-            low, middle, high = [],[],[]
-            for i in range (0,k-1):
-                tags = tags_and_codes[0][num*i:num*(i+1)]
+            if ifsort == 'y':
+                k = 9
+                num = len(tags_and_codes[0])//k
+                print('TOTAL ', len(tags_and_codes[0]))
+                low, middle, high = [],[],[]
+                for i in range (0,k-1):
+                    tags = tags_and_codes[0][num*i:num*(i+1)]
+                    L,M,H = sort_by_frequency(tags, amount)
+                    low.extend(L)
+                    middle.extend(M)
+                    high.extend(H)
+                    print(i+1, '/', k , 'sorted')
+                    time.sleep(60)
+                tags = tags_and_codes[0][num*(k-1):len(tags_and_codes[0])]
                 L,M,H = sort_by_frequency(tags, amount)
                 low.extend(L)
                 middle.extend(M)
                 high.extend(H)
-                print('sleep ', i)
-                time.sleep(60)
-            tags = tags_and_codes[0][num*(k-1):len(tags_and_codes[0])]
-            L,M,H = sort_by_frequency(tags, amount)
-            low.extend(L)
-            middle.extend(M)
-            high.extend(H)
+
+                filename = command[1] + '_sbf.txt'
+                f = open(filename, 'a+', encoding='utf8')
+                f.write('Low frequency tags:\n\n')
+                for tag in low:
+                    f.write('%s\n' % tag)
+                f.write('\nMiddle frequency tags:\n\n')
+                for tag in middle:
+                    f.write('%s\n' % tag)
+                f.write('\nHigh frequency tags:\n\n')
+                for tag in high:
+                    f.write('%s\n' % tag)            
+                f.close()
 
             filename = command[1] + '.txt'
             f = open(filename, 'a+', encoding='utf8')
-            f.write('Low frequency tags:\n\n')
-            for tag in low:
-                try:
-                    f.write('%s\n' % tag)
-                except:
-                    pass
-            f.write('\nMiddle frequency tags:\n\n')
-            for tag in middle:
-                try:
-                    f.write('%s\n' % tag)
-                except:
-                    pass
-            f.write('\nHigh frequency tags:\n\n')
-            for tag in high:
-                try:
-                    f.write('%s\n' % tag)
-                except:
-                    pass                    
+            for tag in tags_and_codes[0]:
+                f.write("%s\n" % tag)
             f.close()
-            
+
     elif command == ['q']:
         print('here I am')
         break
