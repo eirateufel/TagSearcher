@@ -90,14 +90,36 @@ def from_top(tag, tags, amount, banned_languaches, non_bmp_map, header):
     return(moretags,codes)
 
 def from_first_comment(code, header, tags, banned_languaches, non_bmp_map):
+    pause = random.randrange(1,4,1)
+    time.sleep(pause)
+    
     url = 'https://www.instagram.com/p/' + code + '/?__a=1'
     data = load_data(url)
-    coments_count = data['graphql']['shortcode_media']['edge_media_to_comment']['count']
+    print(data)
+    #f= open(code+".txt","w+")
+    #f.writelines(data)
+    #f.close
+    i = 0
+    for line in data:
+        print(line)
+        i+=1
+        if i == 10:
+            break
+        
+
+    coments_count = data['graphql']['shortcode_media']#['edge_media_to_tagged_user']#['edges'][0]['node']['user']['full_name']
+    print(coments_count)
+    local_tags = []
+    return local_tags
     if coments_count > 0:
-        first_comment = data['graphql']['shortcode_media']['edge_media_to_comment']['edges'][0]['node']['text']
-        local_tags = search_tags(first_comment, tags, banned_languaches, non_bmp_map)
-    else:
-        local_tags = []
+        for i in range(0,2):
+            try:
+                comment = data['graphql']['shortcode_media']['edge_media_to_parent_comment']['edges']['node'][i]['text']
+                if '#' in comment:
+                    local_tags = search_tags(comment, tags, banned_languaches, non_bmp_map)
+                    break
+            except:
+                break
     return local_tags
 
 def is_personal(): #check if the tag used as personal tag
